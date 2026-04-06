@@ -1,5 +1,5 @@
 [![npm version][npm-badge]][npm-url]
-[![npm downloads][downloads-badge]][npm-url]
+<!-- [![npm downloads][downloads-badge]][npm-url] -->
 [![license][license-badge]][license-url]
 [![TypeScript][typescript-badge]][typescript-url]
 [![React][react-badge]][react-url]
