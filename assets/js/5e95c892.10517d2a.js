@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkreact_webcam_pro_docs=globalThis.webpackChunkreact_webcam_pro_docs||[]).push([[647],{7121(e,r,a){a.r(r),a.d(r,{default:()=>d});a(6540);var c=a(4164),s=a(7559),o=a(5500),t=a(2831),u=a(6250),l=a(4848);function d(e){return(0,l.jsx)(o.e3,{className:(0,c.A)(s.G.wrapper.docsPages),children:(0,l.jsx)(u.A,{children:(0,t.v)(e.route.routes)})})}}}]);

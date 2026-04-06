@@ -1,0 +1,3 @@
+# robots.txt for react-webcam-pro docs
+User-agent: *
+Disallow:
