@@ -8,6 +8,8 @@ import {
   mockEnumerateDevices,
   mockTrackStop,
   mockDevices,
+  mockDrawImage,
+  mockCanvasContext,
 } from './setup';
 
 // Helper to flush promises
@@ -334,6 +336,7 @@ describe('Camera Component', () => {
     });
 
     it('should handle getUserMedia rejection gracefully', async () => {
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       mockGetUserMedia.mockRejectedValueOnce(new Error('NotAllowedError'));
 
       await act(async () => {
@@ -347,6 +350,7 @@ describe('Camera Component', () => {
       // Should not crash — component should still be rendered
       const videoElement = document.querySelector('video');
       expect(videoElement).toBeInTheDocument();
+      errorSpy.mockRestore();
     });
 
     it('should show not supported message when mediaDevices is unavailable', async () => {
@@ -397,6 +401,7 @@ describe('Camera Component', () => {
 
   describe('Error handling', () => {
     it('should handle PermissionDeniedError', async () => {
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       const error = new Error('Permission denied');
       error.name = 'PermissionDeniedError';
       mockGetUserMedia.mockRejectedValueOnce(error);
@@ -410,9 +415,9 @@ describe('Camera Component', () => {
       });
 
       // Component should show permission denied message
-      // (we can't easily check styled-components rendered text in jsdom,
-      // but we verify no crash)
       expect(document.querySelector('video')).toBeInTheDocument();
+      expect(errorSpy).toHaveBeenCalledWith(expect.objectContaining({ name: 'PermissionDeniedError' }));
+      errorSpy.mockRestore();
     });
   });
 });
@@ -434,5 +439,223 @@ describe('Camera Types', () => {
         torchSupported: expect.any(Boolean),
       }),
     );
+  });
+});
+
+describe('Fix #52 — videoConstraints prop', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should pass videoConstraints to getUserMedia', async () => {
+    const customConstraints = { width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 30 } };
+
+    await act(async () => {
+      render(<Camera videoConstraints={customConstraints} />);
+    });
+
+    await waitFor(() => {
+      expect(mockGetUserMedia).toHaveBeenCalled();
+    });
+
+    const calls = mockGetUserMedia.mock.calls;
+    const lastCall = calls[calls.length - 1];
+    expect(lastCall[0].video).toEqual(
+      expect.objectContaining({
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
+        frameRate: { ideal: 30 },
+        facingMode: 'user',
+      }),
+    );
+  });
+
+  it('should work without videoConstraints (backward compatible)', async () => {
+    await act(async () => {
+      render(<Camera />);
+    });
+
+    await waitFor(() => {
+      expect(mockGetUserMedia).toHaveBeenCalled();
+    });
+
+    const calls = mockGetUserMedia.mock.calls;
+    const lastCall = calls[calls.length - 1];
+    // Should only have deviceId and facingMode, no extra constraints
+    expect(lastCall[0].video.facingMode).toBe('user');
+    expect(lastCall[0].video.width).toBeUndefined();
+    expect(lastCall[0].video.height).toBeUndefined();
+  });
+
+  it('should allow videoConstraints to override facingMode', async () => {
+    await act(async () => {
+      render(<Camera facingMode="user" videoConstraints={{ facingMode: 'environment' }} />);
+    });
+
+    await waitFor(() => {
+      expect(mockGetUserMedia).toHaveBeenCalled();
+    });
+
+    const calls = mockGetUserMedia.mock.calls;
+    const lastCall = calls[calls.length - 1];
+    // videoConstraints spread after facingMode, so it should override
+    expect(lastCall[0].video.facingMode).toBe('environment');
+  });
+});
+
+describe('Fix #75/#77 — getCapabilities crash on Firefox/iOS 15', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should handle devices without getCapabilities (Firefox)', async () => {
+    // Create devices WITHOUT getCapabilities
+    const devicesWithoutCapabilities: MediaDeviceInfo[] = [
+      {
+        deviceId: 'ff-camera-1',
+        groupId: 'group-1',
+        kind: 'videoinput',
+        label: 'Firefox Camera 1',
+        toJSON: () => ({}),
+      },
+      {
+        deviceId: 'ff-camera-2',
+        groupId: 'group-2',
+        kind: 'videoinput',
+        label: 'Firefox Camera 2',
+        toJSON: () => ({}),
+      },
+    ];
+
+    mockEnumerateDevices.mockResolvedValueOnce(devicesWithoutCapabilities);
+
+    // Should NOT throw — component should render normally
+    await act(async () => {
+      render(<Camera facingMode="environment" />);
+    });
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    const videoElement = document.querySelector('video');
+    expect(videoElement).toBeInTheDocument();
+    expect(mockGetUserMedia).toHaveBeenCalled();
+  });
+
+  it('should handle devices where getCapabilities throws and warn developer', async () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const devicesWithThrowingCapabilities: MediaDeviceInfo[] = [
+      {
+        deviceId: 'ios-camera-1',
+        groupId: 'group-1',
+        kind: 'videoinput',
+        label: 'iOS Camera',
+        toJSON: () => ({}),
+        getCapabilities: () => {
+          throw new Error('getCapabilities not supported');
+        },
+      } as any,
+    ];
+
+    mockEnumerateDevices.mockResolvedValueOnce(devicesWithThrowingCapabilities);
+
+    // Should NOT throw
+    await act(async () => {
+      render(<Camera facingMode="environment" />);
+    });
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    const videoElement = document.querySelector('video');
+    expect(videoElement).toBeInTheDocument();
+    // Should warn developers so they know what happened
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('getCapabilities() not supported'),
+      expect.any(Error),
+    );
+    warnSpy.mockRestore();
+  });
+});
+
+describe('Fix #74 — mirrored photo capture', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockDrawImage.mockClear();
+    mockCanvasContext.clearRect.mockClear();
+  });
+
+  it('should take a normal (non-mirrored) photo by default', async () => {
+    const ref = React.createRef<CameraRef>();
+    await act(async () => {
+      render(<Camera ref={ref} />);
+    });
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    const photo = ref.current?.takePhoto();
+    expect(photo).toBe('data:image/jpeg;base64,mockImageData');
+    // drawImage should be called without scale/translate for mirror
+    expect(mockDrawImage).toHaveBeenCalled();
+  });
+
+  it('should take a mirrored photo when mirror option is true', async () => {
+    const ref = React.createRef<CameraRef>();
+    await act(async () => {
+      render(<Camera ref={ref} />);
+    });
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    const mockScale = jest.fn();
+    const mockSave = jest.fn();
+    const mockRestore = jest.fn();
+    (mockCanvasContext as any).scale = mockScale;
+    (mockCanvasContext as any).save = mockSave;
+    (mockCanvasContext as any).restore = mockRestore;
+
+    const photo = ref.current?.takePhoto({ mirror: true });
+    expect(photo).toBe('data:image/jpeg;base64,mockImageData');
+    expect(mockSave).toHaveBeenCalled();
+    expect(mockScale).toHaveBeenCalledWith(-1, 1);
+    expect(mockRestore).toHaveBeenCalled();
+  });
+
+  it('should support type via options object', async () => {
+    const ref = React.createRef<CameraRef>();
+    await act(async () => {
+      render(<Camera ref={ref} />);
+    });
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    const imgData = ref.current?.takePhoto({ type: 'imgData' });
+    expect(imgData).toEqual(
+      expect.objectContaining({
+        data: expect.any(Uint8ClampedArray),
+        width: expect.any(Number),
+        height: expect.any(Number),
+      }),
+    );
+  });
+
+  it('should support legacy string type argument (backward compatible)', async () => {
+    const ref = React.createRef<CameraRef>();
+    await act(async () => {
+      render(<Camera ref={ref} />);
+    });
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    // Legacy usage: takePhoto('base64url')
+    const photo = ref.current?.takePhoto('base64url');
+    expect(typeof photo).toBe('string');
+    expect(photo).toBe('data:image/jpeg;base64,mockImageData');
   });
 });

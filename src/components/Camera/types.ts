@@ -22,10 +22,20 @@ export interface CameraProps {
   videoReadyCallback?(): void;
   className?: string;
   style?: React.CSSProperties;
+  /** Custom video constraints for resolution, frame rate, etc. (fixes #52) */
+  videoConstraints?: MediaTrackConstraints;
+}
+
+export interface TakePhotoOptions {
+  /** Output format: base64 JPEG data URL or raw ImageData. Default: 'base64url' */
+  type?: 'base64url' | 'imgData';
+  /** Mirror the captured photo horizontally. Useful for user-facing cameras. (fixes #74) */
+  mirror?: boolean;
 }
 
 export interface CameraRef {
   takePhoto(type?: 'base64url' | 'imgData'): string | ImageData;
+  takePhoto(options?: TakePhotoOptions): string | ImageData;
   switchCamera(): FacingMode;
   getNumberOfCameras(): number;
   toggleTorch(): boolean;

@@ -122,6 +122,10 @@ const mockCanvasContext = {
   fillRect: jest.fn(),
   clearRect: jest.fn(),
   putImageData: jest.fn(),
+  save: jest.fn(),
+  restore: jest.fn(),
+  scale: jest.fn(),
+  translate: jest.fn(),
   canvas: document.createElement('canvas'),
 };
 

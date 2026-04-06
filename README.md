@@ -35,16 +35,29 @@ A huge **thank you** to the original creators and contributors of `react-camera-
 
 ---
 
-## ✨ What's New in `react-webcam-pro`
+## ✨ What's New
+
+### v1.1.0 — April 7, 2026
+
+- ✅ **`videoConstraints` prop** — Control resolution, frame rate, and any `MediaTrackConstraints` ([#52](https://github.com/purple-technology/react-camera-pro/issues/52))
+- ✅ **Mirrored photo capture** — `takePhoto({ mirror: true })` for selfie-correct photos ([#74](https://github.com/purple-technology/react-camera-pro/issues/74))
+- ✅ **Fixed Firefox & iOS 15 crash** — `getCapabilities()` handled gracefully with developer warning ([#75](https://github.com/purple-technology/react-camera-pro/issues/75), [#77](https://github.com/purple-technology/react-camera-pro/issues/77))
+- ✅ **Interactive example app** — Try all props live at [react-webcam-pro.vercel.app](https://react-webcam-pro.vercel.app/)
+
+👉 **[Full v1.1.0 release notes](https://amareshsm.github.io/react-webcam-pro/docs/releases/v1.1.0)**
+
+### v1.0.0 — April 6, 2026 *(Initial Release)*
 
 - ✅ **React 19 support** — Works with React 16.8+, 17, 18, and 19
 - ✅ **styled-components v6 support** — Compatible with both v5 and v6
 - ✅ **Fixed DOM warnings** — No more `mirrored` and `aspectRatio` prop warnings ([#48](https://github.com/purple-technology/react-camera-pro/issues/48))
 - ✅ **`errorMessages` is now truly optional** ([#63](https://github.com/purple-technology/react-camera-pro/issues/63))
 - ✅ **`className` and `style` props** — Style the camera container easily ([#47](https://github.com/purple-technology/react-camera-pro/issues/47))
-- ✅ **Fixed camera switching with `videoSourceDeviceId`** — Device selection now works correctly in environment mode ([#62](https://github.com/purple-technology/react-camera-pro/issues/62), [#69](https://github.com/purple-technology/react-camera-pro/issues/69))
+- ✅ **Fixed camera switching with `videoSourceDeviceId`** — Device selection works correctly in environment mode ([#62](https://github.com/purple-technology/react-camera-pro/issues/62), [#69](https://github.com/purple-technology/react-camera-pro/issues/69))
 - ✅ **Proper test suite** — Jest + React Testing Library
-- ✅ **Modern toolchain** — TypeScript 5, Rollup 4, and up-to-date dev dependencies
+- ✅ **Modern toolchain** — TypeScript 5, Rollup 4
+
+👉 **[Full v1.0.0 release notes](https://amareshsm.github.io/react-webcam-pro/docs/releases/v1.0.0)** · **[All releases →](https://amareshsm.github.io/react-webcam-pro/docs/releases/changelog)**
 
 ---
 
@@ -54,12 +67,14 @@ A huge **thank you** to the original creators and contributors of `react-camera-
 - 📐 Fully responsive video element
   - Cover your container or define aspect ratio (16/9, 4/3, 1/1, ...)
 - 📸 Take photos as base64 JPEG or ImageData — with the same aspect ratio as the view
+- 🪞 Mirror captured photos with `takePhoto({ mirror: true })`
+- 🎛️ Custom video constraints via `videoConstraints` prop (resolution, fps, etc.)
 - 🖥️ Works with standard webcams and other video input devices
 - 🔄 Switch between user/environment cameras
 - 🔦 Torch/flashlight support
 - 🔢 Detect number of available cameras
-- 🪞 Facing camera is mirrored, environment is not
-- 🎛️ Controlled via React [Ref](https://react.dev/learn/manipulating-the-dom-with-refs)
+- 🔮 Facing camera is mirrored, environment is not
+- ⚡ Controlled via React [Ref](https://react.dev/learn/manipulating-the-dom-with-refs)
 - 📝 Written in TypeScript
 
 ---
@@ -105,16 +120,17 @@ export default App;
 
 ## Props
 
-| Prop                      | Type                             | Default        | Description                                      |
-| ------------------------- | -------------------------------- | -------------- | ------------------------------------------------ |
-| `facingMode`              | `'user' \| 'environment'`       | `'user'`       | Default camera facing mode                       |
-| `aspectRatio`             | `'cover' \| number`             | `'cover'`      | Aspect ratio of the video (e.g. `16/9`, `4/3`)   |
-| `numberOfCamerasCallback` | `(numberOfCameras: number) => void` | `() => null` | Called when the number of cameras changes        |
-| `videoSourceDeviceId`     | `string`                         | `undefined`    | Specific video device ID to use                  |
-| `errorMessages`           | `object` (optional)              | See below      | Custom error messages                            |
-| `videoReadyCallback`      | `() => void`                     | `() => null`   | Called when the video feed is ready               |
-| `className`               | `string`                         | `undefined`    | CSS class name for the container                 |
-| `style`                   | `React.CSSProperties`           | `undefined`    | Inline styles for the container                  |
+| Prop                      | Type                                | Default        | Description                                                      |
+| ------------------------- | ----------------------------------- | -------------- | ---------------------------------------------------------------- |
+| `facingMode`              | `'user' \| 'environment'`          | `'user'`       | Default camera facing mode                                       |
+| `aspectRatio`             | `'cover' \| number`                | `'cover'`      | Aspect ratio of the video (e.g. `16/9`, `4/3`)                   |
+| `numberOfCamerasCallback` | `(numberOfCameras: number) => void` | `() => null`   | Called when the number of cameras changes                        |
+| `videoSourceDeviceId`     | `string`                            | `undefined`    | Specific video device ID to use                                  |
+| `videoConstraints`        | `MediaTrackConstraints`             | `undefined`    | Custom video constraints (resolution, fps, etc.) *(new in v1.1.0)* |
+| `errorMessages`           | `object` (optional)                 | See below      | Custom error messages                                            |
+| `videoReadyCallback`      | `() => void`                        | `() => null`   | Called when the video feed is ready                              |
+| `className`               | `string`                            | `undefined`    | CSS class name for the container                                 |
+| `style`                   | `React.CSSProperties`              | `undefined`    | Inline styles for the container                                  |
 
 ### Error Messages
 
@@ -133,13 +149,14 @@ All fields are optional. Defaults:
 
 ## Methods (via Ref)
 
-| Method                | Return Type              | Description                                  |
-| --------------------- | ------------------------ | -------------------------------------------- |
-| `takePhoto(type?)`    | `string \| ImageData`   | Takes a photo. Default type is `'base64url'` |
-| `switchCamera()`      | `'user' \| 'environment'` | Switches between front and back camera      |
-| `getNumberOfCameras()` | `number`                | Returns the number of available cameras      |
-| `toggleTorch()`       | `boolean`               | Toggles the torch/flashlight                 |
-| `torchSupported`      | `boolean`               | Whether the torch is supported               |
+| Method                              | Return Type               | Description                                                              |
+| ----------------------------------- | ------------------------- | ------------------------------------------------------------------------ |
+| `takePhoto(type?)`                  | `string \| ImageData`    | Takes a photo. `type` is `'base64url'` (default) or `'imgData'`          |
+| `takePhoto(options?)`               | `string \| ImageData`    | Takes a photo with options. Pass `{ mirror: true }` for mirrored capture *(new in v1.1.0)* |
+| `switchCamera()`                    | `'user' \| 'environment'` | Switches between front and back camera                                   |
+| `getNumberOfCameras()`              | `number`                  | Returns the number of available cameras                                  |
+| `toggleTorch()`                     | `boolean`                 | Toggles the torch/flashlight                                             |
+| `torchSupported`                    | `boolean`                 | Whether the torch is supported                                           |
 
 ---
 
@@ -184,6 +201,34 @@ const App = () => {
 
 ```tsx
 <Camera ref={camera} aspectRatio={16 / 9} />
+```
+
+### Video Constraints *(new in v1.1.0)*
+
+Use `videoConstraints` to request a specific resolution, frame rate, or any other `MediaTrackConstraints`:
+
+```tsx
+<Camera
+  ref={camera}
+  videoConstraints={{
+    width: { ideal: 1920 },
+    height: { ideal: 1080 },
+    frameRate: { ideal: 30 },
+  }}
+/>
+```
+
+### Mirrored Photo Capture *(new in v1.1.0)*
+
+By default, photos are captured unmirrored (correct for environment cameras). Pass `{ mirror: true }` to flip horizontally — useful for selfie cameras:
+
+```tsx
+// With type only (existing API)
+const photo = camera.current.takePhoto('base64url');
+
+// With options object (new in v1.1.0)
+const mirroredPhoto = camera.current.takePhoto({ mirror: true });
+const imgData = camera.current.takePhoto({ type: 'imgData', mirror: true });
 ```
 
 ### Using within an iframe
@@ -268,7 +313,7 @@ MIT — See [LICENSE](./LICENSE) for details.
 [docs-badge]: https://img.shields.io/badge/docs-live-brightgreen?style=flat-square&logo=github
 
 [npm-url]: https://www.npmjs.com/package/react-webcam-pro
-[license-url]: ./LICENSE
+[license-url]: https://github.com/amareshsm/react-webcam-pro/blob/master/LICENSE
 [typescript-url]: https://www.typescriptlang.org/
 [react-url]: https://react.dev/
 [docs-url]: https://amareshsm.github.io/react-webcam-pro/

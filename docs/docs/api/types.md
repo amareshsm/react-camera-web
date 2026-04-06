@@ -15,7 +15,8 @@ import {
   Camera,
   CameraRef,
   CameraProps,
-  CameraType,      // deprecated alias — use CameraRef
+  TakePhotoOptions, // new in v1.1.0
+  CameraType,       // deprecated alias — use CameraRef
 } from 'react-webcam-pro';
 ```
 
@@ -28,6 +29,7 @@ The interface for the camera ref object. Use this to type your `useRef`:
 ```ts
 interface CameraRef {
   takePhoto(type?: 'base64url' | 'imgData'): string | ImageData;
+  takePhoto(options?: TakePhotoOptions): string | ImageData;
   switchCamera(): FacingMode;
   getNumberOfCameras(): number;
   toggleTorch(): boolean;
@@ -82,10 +84,36 @@ interface CameraProps {
   videoReadyCallback?(): void;
   className?: string;
   style?: React.CSSProperties;
+  videoConstraints?: MediaTrackConstraints; // new in v1.1.0
 }
 ```
 
 See the [Props](/docs/api/props) page for detailed documentation of each property.
+
+---
+
+## `TakePhotoOptions`
+
+Options object for `takePhoto()`. New in v1.1.0.
+
+```ts
+interface TakePhotoOptions {
+  /** Output format: base64 JPEG data URL or raw ImageData. Default: 'base64url' */
+  type?: 'base64url' | 'imgData';
+  /** Mirror the captured photo horizontally. Useful for user-facing cameras. */
+  mirror?: boolean;
+}
+```
+
+### Usage
+
+```tsx
+// Mirrored selfie
+const photo = cameraRef.current.takePhoto({ mirror: true });
+
+// Mirrored ImageData for processing
+const imgData = cameraRef.current.takePhoto({ type: 'imgData', mirror: true });
+```
 
 ---
 

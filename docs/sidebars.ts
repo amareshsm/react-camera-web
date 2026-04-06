@@ -47,6 +47,7 @@ const sidebars: SidebarsConfig = {
       collapsed: false,
       items: [
         'releases/changelog',
+        'releases/v1.1.0',
         'releases/v1.0.0',
       ],
     },

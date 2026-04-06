@@ -31,15 +31,26 @@ const photo = cameraRef.current?.takePhoto();
 
 ---
 
-## `takePhoto(type?)`
+## `takePhoto(type?)` / `takePhoto(options?)`
 
 Captures the current camera frame as an image.
+
+### Signature 1: String argument (original)
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `type` | `'base64url' \| 'imgData'` | `'base64url'` | Output format |
 
+### Signature 2: Options object (new in v1.1.0)
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `options.type` | `'base64url' \| 'imgData'` | `'base64url'` | Output format |
+| `options.mirror` | `boolean` | `false` | Mirror the captured photo horizontally |
+
 **Returns:** `string | ImageData`
+
+Both signatures are supported — the original string argument continues to work for full backward compatibility.
 
 ### Base64 URL (default)
 
@@ -71,6 +82,26 @@ const handleCapture = () => {
   }
 };
 ```
+
+### Mirrored Photos (new in v1.1.0)
+
+User-facing cameras show a mirrored preview (like a mirror), but by default `takePhoto()` captures the un-mirrored image. Use the `mirror` option to capture a photo that matches what the user sees:
+
+```tsx
+// Mirrored selfie — matches the preview
+const photo = cameraRef.current.takePhoto({ mirror: true });
+
+// Mirrored ImageData
+const imgData = cameraRef.current.takePhoto({ type: 'imgData', mirror: true });
+
+// Non-mirrored (default behavior)
+const photo = cameraRef.current.takePhoto();
+const photo = cameraRef.current.takePhoto({ mirror: false });
+```
+
+:::tip When to use mirror
+Enable `mirror: true` for selfies so text and faces appear the way the user expects (as in a mirror). Leave it off for document scanning or environment camera captures.
+:::
 
 ### Aspect Ratio Matching
 

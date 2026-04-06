@@ -8,6 +8,7 @@ import {
   SetNumberOfCameras,
   SetNotSupported,
   SetPermissionDenied,
+  TakePhotoOptions,
 } from './types';
 import { Container, Wrapper, Canvas, Cam, ErrorMsg } from './styles';
 
@@ -30,6 +31,7 @@ export const Camera = React.forwardRef<CameraRef, CameraProps>(
       videoReadyCallback = () => null,
       className,
       style,
+      videoConstraints,
     },
     ref,
   ) => {
@@ -81,7 +83,17 @@ export const Camera = React.forwardRef<CameraRef, CameraProps>(
     }, [torch]);
 
     useImperativeHandle(ref, () => ({
-      takePhoto: (type?: 'base64url' | 'imgData'): string | ImageData => {
+      takePhoto: (typeOrOptions?: 'base64url' | 'imgData' | TakePhotoOptions): string | ImageData => {
+        // Support both legacy string arg and new options object
+        let type: 'base64url' | 'imgData' | undefined;
+        let mirror = false;
+        if (typeof typeOrOptions === 'object' && typeOrOptions !== null) {
+          type = typeOrOptions.type;
+          mirror = typeOrOptions.mirror ?? false;
+        } else {
+          type = typeOrOptions;
+        }
+
         if (numberOfCameras < 1) {
           throw new Error(errorMessages.noCameraAccessible);
         }
@@ -117,7 +129,14 @@ export const Camera = React.forwardRef<CameraRef, CameraProps>(
           }
 
           if (context.current && player?.current) {
-            context.current.drawImage(player.current, sX, sY, sW, sH, 0, 0, sW, sH);
+            if (mirror) {
+              context.current.save();
+              context.current.scale(-1, 1);
+              context.current.drawImage(player.current, sX, sY, sW, sH, -sW, 0, sW, sH);
+              context.current.restore();
+            } else {
+              context.current.drawImage(player.current, sX, sY, sW, sH, 0, 0, sW, sH);
+            }
           }
 
           if (type === 'imgData') {
@@ -163,6 +182,7 @@ export const Camera = React.forwardRef<CameraRef, CameraProps>(
         setNotSupported,
         setPermissionDenied,
         !!mounted.current,
+        videoConstraints,
       );
     }, [currentFacingMode, videoSourceDeviceId]);
 
@@ -211,9 +231,25 @@ const shouldSwitchToCamera = async (currentFacingMode: FacingMode): Promise<stri
     await navigator.mediaDevices.enumerateDevices().then((devices) => {
       const videoDevices = devices.filter((i) => i.kind == 'videoinput');
       videoDevices.forEach((device) => {
-        const capabilities = (device as InputDeviceInfo).getCapabilities();
-        if (capabilities.facingMode && capabilities.facingMode.indexOf('environment') >= 0 && capabilities.deviceId) {
-          cameras.push(capabilities.deviceId);
+        try {
+          // getCapabilities() is not available on Firefox and iOS 15 Safari (fixes #75, #77)
+          if (typeof (device as InputDeviceInfo).getCapabilities === 'function') {
+            const capabilities = (device as InputDeviceInfo).getCapabilities();
+            if (
+              capabilities.facingMode &&
+              capabilities.facingMode.indexOf('environment') >= 0 &&
+              capabilities.deviceId
+            ) {
+              cameras.push(capabilities.deviceId);
+            }
+          }
+        } catch (err) {
+          // getCapabilities() may throw on certain browsers (e.g. Firefox, iOS 15 Safari)
+          console.warn(
+            `[react-webcam-pro] getCapabilities() not supported for device "${device.label || device.deviceId}". ` +
+              `Camera will still work, but automatic environment camera detection is skipped for this device.`,
+            err,
+          );
         }
       });
     });
@@ -235,6 +271,7 @@ const initCameraStream = async (
   setNotSupported: SetNotSupported,
   setPermissionDenied: SetPermissionDenied,
   isMounted: boolean,
+  videoConstraints?: MediaTrackConstraints,
 ) => {
   // stop any active streams in the window
   if (stream) {
@@ -260,6 +297,7 @@ const initCameraStream = async (
     video: {
       deviceId: cameraDeviceId,
       facingMode: currentFacingMode,
+      ...videoConstraints,
     },
   };
 

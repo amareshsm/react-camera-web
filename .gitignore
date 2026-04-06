@@ -22,6 +22,7 @@ Thumbs.db
 # Example app
 example/build/
 example/dist/
+/mydocs
 
 # Docs site
 docs/build/

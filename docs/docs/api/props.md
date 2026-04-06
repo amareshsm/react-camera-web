@@ -261,6 +261,54 @@ This prop was not available in `react-camera-pro`.
 
 ---
 
+## `videoConstraints`
+
+| Type | Default | Required |
+|------|---------|----------|
+| `MediaTrackConstraints` | `undefined` | No |
+
+Custom video constraints passed directly to [`getUserMedia()`](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia). Use this to control camera resolution, frame rate, and other hardware capabilities.
+
+The constraints are **merged** into the internal `getUserMedia` call after `deviceId` and `facingMode`, so any property you set here will override the defaults.
+
+```tsx
+// Request Full HD at 30fps
+<Camera
+  videoConstraints={{
+    width: { ideal: 1920 },
+    height: { ideal: 1080 },
+    frameRate: { ideal: 30 },
+  }}
+/>
+
+// Request exact 4K resolution
+<Camera
+  videoConstraints={{
+    width: { exact: 3840 },
+    height: { exact: 2160 },
+  }}
+/>
+
+// Set a minimum frame rate
+<Camera
+  videoConstraints={{
+    frameRate: { min: 24, ideal: 60 },
+  }}
+/>
+```
+
+:::tip How `ideal` vs `exact` works
+- **`ideal`** — The browser will try to match this value but will fall back gracefully if the hardware doesn't support it.
+- **`exact`** — The browser will **fail** if the hardware can't match exactly. Only use this when you're sure the device supports it.
+- **`min` / `max`** — Set a range. The browser picks the best value within the range.
+:::
+
+:::info New in v1.1.0
+This prop was not available in previous versions. See the [v1.1.0 release notes](/docs/releases/v1.1.0).
+:::
+
+---
+
 ## Props Summary Table
 
 | Prop | Type | Default | Description |
@@ -273,3 +321,4 @@ This prop was not available in `react-camera-pro`.
 | `videoReadyCallback` | `() => void` | `() => null` | Video ready callback |
 | `className` | `string` | `undefined` | CSS class name |
 | `style` | `CSSProperties` | `undefined` | Inline styles |
+| `videoConstraints` | `MediaTrackConstraints` | `undefined` | Custom video constraints |
