@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 GitHub Discussions
+    url: https://github.com/amareshsm/react-webcam-pro/discussions
+    about: Ask general questions and share ideas in Discussions
+  - name: 📖 Documentation
+    url: https://amareshsm.github.io/react-webcam-pro/
+    about: Check the docs before opening an issue
+  - name: 📦 npm Package
+    url: https://www.npmjs.com/package/react-webcam-pro
+    about: View the package on npm
