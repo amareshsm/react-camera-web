@@ -22,21 +22,63 @@ const config: Config = {
       tagName: 'meta',
       attributes: {
         name: 'keywords',
-        content: 'react-webcam-pro, react-camera-pro, react-camera-web, react webcam, react camera, camera component, webcam component, react19 camera, iOS camera react, Android camera react, getUserMedia react, webRTC react',
+        content: 'react-webcam-pro, react-camera-pro, react-camera-pro alternative, react-camera-web, react webcam, react camera, camera component, webcam component, react19 camera, iOS camera react, Android camera react, getUserMedia react, webRTC react, video constraints react, mirror photo react, react camera component, react-camera-pro fork',
       },
     },
     {
       tagName: 'meta',
       attributes: {
         name: 'description',
-        content: 'react-webcam-pro — Universal Camera component for React. Community-maintained fork of react-camera-pro with React 19 support, styled-components v6 compatibility, and bug fixes.',
+        content: 'react-webcam-pro — The maintained alternative to react-camera-pro. Universal camera component for React 16–19 with videoConstraints, mirror photo capture, Firefox/iOS fixes, and full TypeScript support.',
+      },
+    },
+    {
+      tagName: 'meta',
+      attributes: {
+        property: 'og:title',
+        content: 'react-webcam-pro — React Camera Component | react-camera-pro Alternative',
       },
     },
     {
       tagName: 'meta',
       attributes: {
         property: 'og:description',
-        content: 'Community-maintained fork of react-camera-pro. Supports React 16–19, styled-components v5/v6, fully backward compatible.',
+        content: 'The maintained alternative to react-camera-pro. Supports React 16–19, videoConstraints, mirror photo capture, Firefox/iOS fixes. Drop-in replacement — just change the import.',
+      },
+    },
+    {
+      tagName: 'meta',
+      attributes: {
+        property: 'og:type',
+        content: 'website',
+      },
+    },
+    {
+      tagName: 'meta',
+      attributes: {
+        property: 'og:url',
+        content: 'https://amareshsm.github.io/react-webcam-pro/',
+      },
+    },
+    {
+      tagName: 'meta',
+      attributes: {
+        name: 'twitter:card',
+        content: 'summary_large_image',
+      },
+    },
+    {
+      tagName: 'meta',
+      attributes: {
+        name: 'twitter:title',
+        content: 'react-webcam-pro — React Camera Component | react-camera-pro Alternative',
+      },
+    },
+    {
+      tagName: 'meta',
+      attributes: {
+        name: 'twitter:description',
+        content: 'The maintained alternative to react-camera-pro. React 19 ready, videoConstraints, mirror photos, Firefox/iOS fixes.',
       },
     },
   ],
@@ -78,6 +120,12 @@ const config: Config = {
           editUrl: 'https://github.com/amareshsm/react-webcam-pro/tree/master/docs/',
         },
         blog: false,
+        sitemap: {
+          changefreq: 'weekly',
+          priority: 0.5,
+          ignorePatterns: [],
+          filename: 'sitemap.xml',
+        },
         theme: {
           customCss: './src/css/custom.css',
         },

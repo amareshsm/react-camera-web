@@ -9,6 +9,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'getting-started/installation',
         'getting-started/quick-start',
+        'getting-started/why-react-webcam-pro',
       ],
     },
     {

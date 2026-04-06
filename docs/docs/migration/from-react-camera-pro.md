@@ -14,21 +14,11 @@ description: Step-by-step guide for migrating from react-camera-pro to react-web
 
 ## Why Migrate?
 
-The original `react-camera-pro` has several unresolved issues:
+The original `react-camera-pro` has not been maintained for over 2 years, with numerous unresolved issues: React 19 crashes, Firefox/iOS bugs, missing features like `videoConstraints` and mirrored photo capture, and DOM warnings that can't be suppressed.
 
-| Issue | Status in react-camera-pro | Status in react-webcam-pro |
-|-------|---------------------------|---------------------------|
-| React 19 support | ❌ [Not supported](https://github.com/purple-technology/react-camera-pro/issues/70) | ✅ Fixed |
-| styled-components v6 DOM warnings | ❌ [Open issue](https://github.com/purple-technology/react-camera-pro/issues/48) | ✅ Fixed |
-| `errorMessages` prop required | ❌ [Required even for defaults](https://github.com/purple-technology/react-camera-pro/issues/63) | ✅ Optional |
-| `className` / `style` props | ❌ [Not available](https://github.com/purple-technology/react-camera-pro/issues/47) | ✅ Added |
-| `videoSourceDeviceId` ignored | ❌ [Broken in environment mode](https://github.com/purple-technology/react-camera-pro/issues/62) | ✅ Fixed |
-| Camera switching with device ID | ❌ [Broken](https://github.com/purple-technology/react-camera-pro/issues/69) | ✅ Fixed |
-| `videoConstraints` prop | ❌ [Not available](https://github.com/purple-technology/react-camera-pro/issues/52) | ✅ Added *(v1.1.0)* |
-| Mirrored photo capture | ❌ [Not available](https://github.com/purple-technology/react-camera-pro/issues/74) | ✅ Added *(v1.1.0)* |
-| Firefox & iOS 15 crash | ❌ [Crashes on `getCapabilities()`](https://github.com/purple-technology/react-camera-pro/issues/75) | ✅ Fixed *(v1.1.0)* |
-| Modern toolchain | ❌ TypeScript 3.7, Rollup 1 | ✅ TypeScript 5, Rollup 4 |
-| Test suite | ❌ No tests | ✅ 69 tests |
+`react-webcam-pro` fixes all of these and is actively maintained with 69 tests.
+
+👉 **See the full feature-by-feature comparison on the [Why react-webcam-pro?](/docs/getting-started/why-react-webcam-pro) page.**
 
 ---
 

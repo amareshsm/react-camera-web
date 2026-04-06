@@ -74,7 +74,7 @@ function HomepageHeader() {
       <div className={styles.heroGlow} />
       <div className="container">
         <div className={styles.heroBadge}>
-          <span>✨ v1.0 — React 19 Ready</span>
+          <span>✨ v1.1.0 — videoConstraints, Mirror Photos & Browser Fixes</span>
         </div>
         <div className={styles.heroTitleRow}>
           <CameraLogo />
@@ -140,31 +140,33 @@ const FeatureList: FeatureItem[] = [
     emoji: '⚛️',
     description:
       'Supports React 16.8+, 17, 18, and 19 out of the box. Compatible with styled-components v5 and v6.',
-    tag: 'New',
+    tag: 'Updated',
+  },
+  {
+    title: 'Video Constraints',
+    emoji: '🎛️',
+    description:
+      'Control camera resolution, frame rate and any MediaTrackConstraints directly via the videoConstraints prop.',
+    tag: 'New in v1.1',
+  },
+  {
+    title: 'Mirror Photo Capture',
+    emoji: '🪞',
+    description:
+      'Capture selfie-correct mirrored photos with takePhoto({ mirror: true }). Matches exactly what the user sees.',
+    tag: 'New in v1.1',
   },
   {
     title: 'Full Control via Ref',
-    emoji: '🎛️',
+    emoji: '�',
     description:
       'Take photos, switch cameras, toggle torch, and more — all controlled via a simple React ref.',
-  },
-  {
-    title: 'Flexible Aspect Ratio',
-    emoji: '📐',
-    description:
-      'Cover the entire container or set a specific aspect ratio like 16/9, 4/3, or 1/1.',
-  },
-  {
-    title: 'TypeScript First',
-    emoji: '📝',
-    description:
-      'Written entirely in TypeScript with full type definitions. Excellent IDE support and autocompletion.',
   },
   {
     title: 'Drop-in Replacement',
     emoji: '🔄',
     description:
-      'Migrating from react-camera-pro? Just change the import — the API is fully backward compatible.',
+      'Best alternative to react-camera-pro. Just change the import — the API is 100% backward compatible.',
   },
 ];
 
@@ -296,8 +298,8 @@ export default function Home(): React.ReactElement {
   const { siteConfig } = useDocusaurusContext();
   return (
     <Layout
-      title={`${siteConfig.title} — Camera component for React`}
-      description="Universal Camera component for React. Designed for iOS, Android and webcams. React 19 ready."
+      title={`${siteConfig.title} — React Camera Component | react-camera-pro Alternative`}
+      description="react-webcam-pro: the maintained alternative to react-camera-pro. Universal camera component for React with React 19 support, videoConstraints, mirror photos, Firefox/iOS fixes, and 69 tests."
     >
       <HomepageHeader />
       <main>
