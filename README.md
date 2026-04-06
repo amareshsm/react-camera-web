@@ -11,6 +11,8 @@ Universal Camera component for React.
 
 Designed with focus on Android and iOS cameras. Works with standard webcams as well.
 
+🚀 **[Live Demo](https://react-webcam-pro.vercel.app/)**
+
 See [browser compatibility](http://caniuse.com/#feat=stream).
 
 > **Note:** WebRTC is only supported on secure connections (HTTPS). You can test and debug from `localhost` in Chrome (this doesn't work in Safari).
@@ -70,7 +72,8 @@ npm install react-webcam-pro
 
 > **Peer dependencies:** `react`, `react-dom`, and `styled-components` (v5 or v6).
 
-📖 **Full documentation:** [amareshsm.github.io/react-webcam-pro](https://amareshsm.github.io/react-webcam-pro/)
+📖 **Documentation:** [amareshsm.github.io/react-webcam-pro](https://amareshsm.github.io/react-webcam-pro/)  
+🎮 **Try it live:** [react-webcam-pro.vercel.app](https://react-webcam-pro.vercel.app/)
 
 ---
 
