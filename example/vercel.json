@@ -1,6 +1,13 @@
 {
-  "outputDirectory": "dist",
   "buildCommand": "npm run build",
   "installCommand": "npm install",
-  "framework": "vite"
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "git": {
+    "deploymentEnabled": {
+      "main": false,
+      "master": true,
+      "gh-pages": false
+    }
+  }
 }
