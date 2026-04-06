@@ -1,7 +1,7 @@
 {
-  "name": "react-camera-pro",
-  "description": "Universal Camera component for React. Designed with focus on Android, iOS cameras and standard webcams.",
-  "version": "1.4.0",
+  "name": "react-camera-web",
+  "description": "Universal Camera component for React. Designed with focus on Android, iOS cameras and standard webcams. Community-maintained fork of react-camera-pro.",
+  "version": "1.0.0",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "keywords": [
@@ -9,60 +9,86 @@
     "webcam",
     "cam",
     "react",
+    "react19",
     "ios",
     "android",
     "mobile",
-    "webRTC"
+    "webRTC",
+    "camera-pro",
+    "react-camera"
   ],
   "repository": {
-    "url": "https://github.com/purple-technology/react-camera-pro",
+    "url": "https://github.com/amareshsm/react-camera-web",
     "type": "git"
   },
-  "homepage": "https://github.com/purple-technology/react-camera-pro#readme",
-  "author": "Martin Urban <murban@purple-technology.com>",
+  "homepage": "https://github.com/amareshsm/react-camera-web#readme",
+  "bugs": {
+    "url": "https://github.com/amareshsm/react-camera-web/issues"
+  },
+  "author": "Amaresh <amareshsm13@gmail.com>",
+  "contributors": [
+    {
+      "name": "Martin Urban",
+      "email": "murban@purple-technology.com"
+    },
+    {
+      "name": "Purple Technology",
+      "url": "https://github.com/purple-technology"
+    }
+  ],
   "license": "MIT",
   "types": "dist/index.d.ts",
-  "dependencies": {
-    "@types/webrtc": "0.0.25",
-    "detectrtc": "^1.3.9"
-  },
   "devDependencies": {
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
+    "@rollup/plugin-typescript": "^12.1.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@types/jest": "^30.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
     "@types/styled-components": "^5.1.34",
-    "@typescript-eslint/eslint-plugin": "^5.41.0",
-    "@typescript-eslint/parser": "^5.41.0",
-    "concurrently": "^5.0.2",
-    "eslint": "^8.26.0",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-react": "^7.31.10",
-    "install-peers-cli": "^2.2.0",
-    "prepend-file": "^1.3.1",
-    "prettier": "^2.7.1",
-    "rollup": "^1.29.0",
-    "rollup-plugin-typescript2": "^0.25.3",
-    "ts-node": "^8.6.2",
-    "tslib": "^1.10.0",
-    "typescript": "^3.7.5"
+    "@typescript-eslint/eslint-plugin": "^8.18.0",
+    "@typescript-eslint/parser": "^8.18.0",
+    "concurrently": "^9.1.0",
+    "eslint": "^9.16.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.0",
+    "eslint-plugin-react": "^7.37.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "prettier": "^3.4.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "rollup": "^4.28.0",
+    "styled-components": "^6.1.0",
+    "ts-jest": "^29.2.0",
+    "ts-node": "^10.9.0",
+    "tslib": "^2.8.0",
+    "typescript": "^5.7.0"
   },
   "peerDependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "styled-components": "^5.1.34"
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0",
+    "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0",
+    "styled-components": "^5.0.0 || ^6.0.0"
   },
   "scripts": {
     "build": "rollup -c",
-    "build-watch": "rollup -c -w",
+    "build:watch": "rollup -c -w",
     "prepublishOnly": "npm run build",
-    "prepare": "install-peers -f && cd example && npm i",
     "start-example": "cd example && npm start",
     "deploy-example": "cd example && npm run deploy",
-    "dev": "concurrently --kill-others \"npm run build-watch\" \"npm run start-example\"",
-    "test": "ts-node test/test.ts",
-    "pretest": "npm run build",
-    "test:lint": "eslint ./src/**/*.ts ./src/**/*.tsx ./example/src/**/*.ts ./example/src/**/*.tsx",
-    "test:lint:fix": "npm run test:lint -- --fix"
+    "dev": "concurrently --kill-others \"npm run build:watch\" \"npm run start-example\"",
+    "test": "jest --verbose",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:ci": "jest --ci --coverage --reporters=default",
+    "lint": "eslint ./src/**/*.ts ./src/**/*.tsx",
+    "lint:fix": "npm run lint -- --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "typecheck": "tsc --noEmit",
+    "docs": "cd docs && npm start",
+    "docs:build": "cd docs && npm run build",
+    "docs:serve": "cd docs && npm run serve",
+    "docs:install": "cd docs && npm install"
   },
   "files": [
     "dist"

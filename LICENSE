@@ -1,6 +1,10 @@
 MIT License
 
-Copyright (c) 2020 Purple Technology
+Copyright (c) 2020 Purple Technology (react-camera-pro)
+Copyright (c) 2026 Amaresh (react-camera-web)
+
+This project is a fork of react-camera-pro (https://github.com/purple-technology/react-camera-pro),
+originally created and maintained by Purple Technology.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

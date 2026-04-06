@@ -1,4 +1,4 @@
 import { Camera } from './components/Camera/Camera';
-import { CameraType, CameraProps } from './components/Camera/types';
+import { CameraType, CameraRef, CameraProps } from './components/Camera/types';
 
-export { Camera, CameraType, CameraProps };
+export { Camera, CameraType, CameraRef, CameraProps };

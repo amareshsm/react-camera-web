@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useImperativeHandle } from 'react';
 import {
   CameraProps,
+  CameraRef,
   FacingMode,
   Stream,
   SetStream,
@@ -10,27 +11,32 @@ import {
 } from './types';
 import { Container, Wrapper, Canvas, Cam, ErrorMsg } from './styles';
 
-export const Camera = React.forwardRef<unknown, CameraProps>(
+const DEFAULT_ERROR_MESSAGES = {
+  noCameraAccessible: 'No camera device accessible. Please connect your camera or try a different browser.',
+  permissionDenied: 'Permission denied. Please refresh and give camera permission.',
+  switchCamera:
+    'It is not possible to switch camera to different one because there is only one video device accessible.',
+  canvas: 'Canvas is not supported.',
+};
+
+export const Camera = React.forwardRef<CameraRef, CameraProps>(
   (
     {
       facingMode = 'user',
       aspectRatio = 'cover',
       numberOfCamerasCallback = () => null,
       videoSourceDeviceId = undefined,
-      errorMessages = {
-        noCameraAccessible: 'No camera device accessible. Please connect your camera or try a different browser.',
-        permissionDenied: 'Permission denied. Please refresh and give camera permission.',
-        switchCamera:
-          'It is not possible to switch camera to different one because there is only one video device accessible.',
-        canvas: 'Canvas is not supported.',
-      },
+      errorMessages: errorMessagesProp,
       videoReadyCallback = () => null,
+      className,
+      style,
     },
     ref,
   ) => {
+    const errorMessages = { ...DEFAULT_ERROR_MESSAGES, ...errorMessagesProp };
     const player = useRef<HTMLVideoElement>(null);
     const canvas = useRef<HTMLCanvasElement>(null);
-    const context = useRef<any | null>(null);
+    const context = useRef<CanvasRenderingContext2D | null>(null);
     const container = useRef<HTMLDivElement>(null);
     const [numberOfCameras, setNumberOfCameras] = useState<number>(0);
     const [stream, setStream] = useState<Stream>(null);
@@ -59,7 +65,7 @@ export const Camera = React.forwardRef<unknown, CameraProps>(
         const [track] = stream.getTracks();
         if (supportedConstraints && 'torch' in supportedConstraints && track) {
           try {
-            await track.applyConstraints({ advanced: [{ torch: on }] } as MediaTrackConstraintSet);
+            await track.applyConstraints({ advanced: [{ torch: on } as MediaTrackConstraintSet] });
             return true;
           } catch {
             return false;
@@ -75,7 +81,7 @@ export const Camera = React.forwardRef<unknown, CameraProps>(
     }, [torch]);
 
     useImperativeHandle(ref, () => ({
-      takePhoto: (type?: 'base64url' | 'imgData') => {
+      takePhoto: (type?: 'base64url' | 'imgData'): string | ImageData => {
         if (numberOfCameras < 1) {
           throw new Error(errorMessages.noCameraAccessible);
         }
@@ -89,7 +95,7 @@ export const Camera = React.forwardRef<unknown, CameraProps>(
           const canvasHeight = container?.current?.offsetHeight || 1280;
           const canvasAR = canvasWidth / canvasHeight;
 
-          let sX, sY, sW, sH, imgData;
+          let sX, sY, sW, sH;
 
           if (playerAR > canvasAR) {
             sH = playerHeight;
@@ -114,16 +120,14 @@ export const Camera = React.forwardRef<unknown, CameraProps>(
             context.current.drawImage(player.current, sX, sY, sW, sH, 0, 0, sW, sH);
           }
 
-          switch (type) {
-            case 'imgData':
-              imgData = context.current?.getImageData(0, 0, sW, sH);
-              break;
-            default: /* base64url */
-              imgData = canvas.current.toDataURL('image/jpeg');
-              break;
+          if (type === 'imgData') {
+            if (!context.current) {
+              throw new Error(errorMessages.canvas);
+            }
+            return context.current.getImageData(0, 0, sW, sH);
           }
 
-          return imgData;
+          return canvas.current.toDataURL('image/jpeg');
         } else {
           throw new Error(errorMessages.canvas);
         }
@@ -177,7 +181,7 @@ export const Camera = React.forwardRef<unknown, CameraProps>(
     }, [stream]);
 
     return (
-      <Container ref={container} aspectRatio={aspectRatio}>
+      <Container ref={container} $aspectRatio={aspectRatio} className={className} style={style}>
         <Wrapper>
           {notSupported ? <ErrorMsg>{errorMessages.noCameraAccessible}</ErrorMsg> : null}
           {permissionDenied ? <ErrorMsg>{errorMessages.permissionDenied}</ErrorMsg> : null}
@@ -187,7 +191,7 @@ export const Camera = React.forwardRef<unknown, CameraProps>(
             muted={true}
             autoPlay={true}
             playsInline={true}
-            mirrored={currentFacingMode === 'user' ? true : false}
+            $mirrored={currentFacingMode === 'user'}
             onLoadedData={() => {
               videoReadyCallback();
             }}
@@ -239,16 +243,19 @@ const initCameraStream = async (
     });
   }
 
+  // If a specific device ID is provided, always use it (fixes #62, #69)
   let cameraDeviceId;
-
-  const switchToCamera = await shouldSwitchToCamera(currentFacingMode);
-  if (switchToCamera) {
-    cameraDeviceId = switchToCamera;
+  if (videoSourceDeviceId) {
+    cameraDeviceId = { exact: videoSourceDeviceId };
   } else {
-    cameraDeviceId = videoSourceDeviceId ? { exact: videoSourceDeviceId } : undefined;
+    // Only auto-detect environment camera when no specific device is requested
+    const switchToCamera = await shouldSwitchToCamera(currentFacingMode);
+    if (switchToCamera) {
+      cameraDeviceId = switchToCamera;
+    }
   }
 
-  const constraints = {
+  const constraints: MediaStreamConstraints = {
     audio: false,
     video: {
       deviceId: cameraDeviceId,
@@ -268,27 +275,7 @@ const initCameraStream = async (
         handleError(err, setNotSupported, setPermissionDenied);
       });
   } else {
-    const getWebcam =
-      navigator.getUserMedia ||
-      navigator.webkitGetUserMedia ||
-      navigator.mozGetUserMedia ||
-      navigator.mozGetUserMedia ||
-      navigator.msGetUserMedia;
-    if (getWebcam) {
-      getWebcam(
-        constraints,
-        async (stream) => {
-          if (isMounted) {
-            setStream(handleSuccess(stream, setNumberOfCameras));
-          }
-        },
-        (err) => {
-          handleError(err as Error, setNotSupported, setPermissionDenied);
-        },
-      );
-    } else {
-      setNotSupported(true);
-    }
+    setNotSupported(true);
   }
 };
 

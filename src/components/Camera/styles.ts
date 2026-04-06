@@ -9,10 +9,10 @@ export const Wrapper = styled.div`
   height: 100%;
 `;
 
-export const Container = styled.div<{ aspectRatio: AspectRatio }>`
+export const Container = styled.div<{ $aspectRatio: AspectRatio }>`
   width: 100%;
-  ${({ aspectRatio }) =>
-    aspectRatio === 'cover'
+  ${({ $aspectRatio }) =>
+    $aspectRatio === 'cover'
       ? `
     position: absolute;
     bottom: 0;
@@ -21,19 +21,19 @@ export const Container = styled.div<{ aspectRatio: AspectRatio }>`
     right: 0;`
       : `
     position: relative;
-    padding-bottom: ${100 / aspectRatio}%;`}
+    padding-bottom: ${100 / $aspectRatio}%;`}
 `;
 
 export const ErrorMsg = styled.div`
   padding: 40px;
 `;
 
-export const Cam = styled.video<{ mirrored: boolean }>`
+export const Cam = styled.video<{ $mirrored: boolean }>`
   width: 100%;
   height: 100%;
   object-fit: cover;
   z-index: 0;
-  transform: rotateY(${({ mirrored }) => (mirrored ? '180deg' : '0deg')});
+  transform: rotateY(${({ $mirrored }) => ($mirrored ? '180deg' : '0deg')});
 `;
 
 export const Canvas = styled.canvas`
