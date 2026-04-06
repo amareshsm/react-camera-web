@@ -24,8 +24,11 @@ The original `react-camera-pro` has several unresolved issues:
 | `className` / `style` props | ❌ [Not available](https://github.com/purple-technology/react-camera-pro/issues/47) | ✅ Added |
 | `videoSourceDeviceId` ignored | ❌ [Broken in environment mode](https://github.com/purple-technology/react-camera-pro/issues/62) | ✅ Fixed |
 | Camera switching with device ID | ❌ [Broken](https://github.com/purple-technology/react-camera-pro/issues/69) | ✅ Fixed |
+| `videoConstraints` prop | ❌ [Not available](https://github.com/purple-technology/react-camera-pro/issues/52) | ✅ Added *(v1.1.0)* |
+| Mirrored photo capture | ❌ [Not available](https://github.com/purple-technology/react-camera-pro/issues/74) | ✅ Added *(v1.1.0)* |
+| Firefox & iOS 15 crash | ❌ [Crashes on `getCapabilities()`](https://github.com/purple-technology/react-camera-pro/issues/75) | ✅ Fixed *(v1.1.0)* |
 | Modern toolchain | ❌ TypeScript 3.7, Rollup 1 | ✅ TypeScript 5, Rollup 4 |
-| Test suite | ❌ No tests | ✅ 60+ tests |
+| Test suite | ❌ No tests | ✅ 69 tests |
 
 ---
 
@@ -123,6 +126,36 @@ You can now style the camera container directly:
   />
 ```
 
+### Use `videoConstraints` for Resolution / Frame Rate *(v1.1.0)*
+
+Control camera resolution, frame rate, or any other `MediaTrackConstraints` that `react-camera-pro` never supported:
+
+```tsx
+<Camera
+  ref={camera}
+  videoConstraints={{
+    width: { ideal: 1920 },
+    height: { ideal: 1080 },
+    frameRate: { ideal: 30 },
+  }}
+/>
+```
+
+### Capture Mirrored Photos *(v1.1.0)*
+
+User-facing cameras show a mirrored preview, but `takePhoto()` previously returned the unmirrored image. Now you can match what the user sees:
+
+```tsx
+// Pass an options object instead of a string
+const photo = cameraRef.current.takePhoto({ mirror: true });
+
+// Combine with type
+const imgData = cameraRef.current.takePhoto({ type: 'imgData', mirror: true });
+
+// The old string syntax still works unchanged
+const photo = cameraRef.current.takePhoto('base64url');
+```
+
 ---
 
 ## Detailed API Comparison
@@ -139,12 +172,14 @@ You can now style the camera container directly:
 | `videoReadyCallback` | ✅ Optional | ✅ Optional | No change |
 | `className` | ❌ Not available | ✅ Optional | **New** |
 | `style` | ❌ Not available | ✅ Optional | **New** |
+| `videoConstraints` | ❌ Not available | ✅ Optional | **New in v1.1.0** — resolution, fps, etc. |
 
 ### Ref Methods
 
 | Method/Property | react-camera-pro | react-webcam-pro | Notes |
 |----------------|-----------------|-----------------|-------|
 | `takePhoto(type?)` | ✅ | ✅ | No change |
+| `takePhoto(options?)` | ❌ Not available | ✅ | **New in v1.1.0** — `{ type?, mirror? }` |
 | `switchCamera()` | ✅ | ✅ | No change |
 | `getNumberOfCameras()` | ✅ | ✅ | No change |
 | `toggleTorch()` | ✅ | ✅ | No change |
@@ -158,6 +193,7 @@ You can now style the camera container directly:
 | `CameraType` | ✅ | ✅ (deprecated) | Kept as alias for `CameraRef` |
 | `CameraProps` | ✅ | ✅ | No change |
 | `CameraRef` | ❌ | ✅ | **New** — recommended ref type |
+| `TakePhotoOptions` | ❌ | ✅ | **New in v1.1.0** — `{ type?, mirror? }` |
 
 ### Peer Dependencies
 
@@ -197,6 +233,14 @@ When using `facingMode="environment"`, the component would auto-detect environme
 `react-camera-pro` included fallback code for `navigator.getUserMedia`, `navigator.webkitGetUserMedia`, `navigator.mozGetUserMedia`, and `navigator.msGetUserMedia` — all of which are long-deprecated browser APIs.
 
 `react-webcam-pro` uses only the modern `navigator.mediaDevices.getUserMedia` API.
+
+### Firefox & iOS 15 Safari Crash Fixed *(v1.1.0)*
+
+**Issue:** [#75](https://github.com/purple-technology/react-camera-pro/issues/75), [#77](https://github.com/purple-technology/react-camera-pro/issues/77)
+
+`react-camera-pro` would crash on Firefox and iOS 15 Safari when calling `getCapabilities()`, which is not supported in those browsers.
+
+**Fix:** `react-webcam-pro` wraps the call in a `try/catch` with a `typeof` check and emits a `console.warn` so developers know exactly what happened — the camera still works, auto environment detection is simply skipped for that device.
 
 ---
 
