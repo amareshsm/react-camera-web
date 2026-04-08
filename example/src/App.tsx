@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Camera, CameraRef } from 'react-webcam-pro';
+import { Camera, CameraRef, CropView, CropResult } from 'react-webcam-pro';
 
 /* ───────── Types ───────── */
 interface Config {
@@ -10,6 +10,9 @@ interface Config {
   frameRate: number;
   mirrorPhoto: boolean;
   deviceId: string | undefined;
+  cropEnabled: boolean;
+  cropAspectRatio: 'free' | number;
+  cropShape: 'rect' | 'circle';
 }
 
 const DEFAULT_CONFIG: Config = {
@@ -20,6 +23,9 @@ const DEFAULT_CONFIG: Config = {
   frameRate: 30,
   mirrorPhoto: false,
   deviceId: undefined,
+  cropEnabled: true,
+  cropAspectRatio: 'free',
+  cropShape: 'rect',
 };
 
 const ASPECT_RATIOS: { label: string; value: 'cover' | number }[] = [
@@ -38,6 +44,15 @@ const RESOLUTIONS: { label: string; w: number; h: number }[] = [
   { label: 'QVGA (320x240)', w: 320, h: 240 },
 ];
 
+const CROP_ASPECT_RATIOS: { label: string; value: 'free' | number }[] = [
+  { label: 'Free', value: 'free' },
+  { label: '1 : 1 (Square)', value: 1 },
+  { label: '16 : 9', value: 16 / 9 },
+  { label: '4 : 3', value: 4 / 3 },
+  { label: '9 : 16', value: 9 / 16 },
+  { label: '3 : 4', value: 3 / 4 },
+];
+
 /* ───────── App ───────── */
 const App: React.FC = () => {
   const camera = useRef<CameraRef>(null);
@@ -50,6 +65,7 @@ const App: React.FC = () => {
   const [videoReady, setVideoReady] = useState(false);
   const [showPanel, setShowPanel] = useState(false);
   const [showPhoto, setShowPhoto] = useState(false);
+  const [showCrop, setShowCrop] = useState(false);
 
   /* Start with panel open only on desktop */
   useEffect(() => {
@@ -80,9 +96,13 @@ const App: React.FC = () => {
       mirror: config.mirrorPhoto,
     });
     setPhoto(result as string);
-    setShowPhoto(true);
     setShowPanel(false);
-  }, [config.mirrorPhoto]);
+    if (config.cropEnabled) {
+      setShowCrop(true);
+    } else {
+      setShowPhoto(true);
+    }
+  }, [config.mirrorPhoto, config.cropEnabled]);
 
   const handleSwitchCamera = useCallback(() => {
     if (!camera.current) return;
@@ -104,6 +124,17 @@ const App: React.FC = () => {
     link.click();
   }, [photo]);
 
+  const handleCropComplete = useCallback((result: CropResult) => {
+    setPhoto(result.base64);
+    setShowCrop(false);
+    setShowPhoto(true);
+  }, []);
+
+  const handleCropCancel = useCallback(() => {
+    setShowCrop(false);
+    setPhoto(null);
+  }, []);
+
   const videoConstraints: MediaTrackConstraints = {
     width: { ideal: config.width },
     height: { ideal: config.height },
@@ -114,7 +145,16 @@ const App: React.FC = () => {
     <div className="app-layout">
       {/* Camera Area */}
       <div className="camera-area">
-        {showPhoto && photo ? (
+        {showCrop && photo ? (
+          <CropView
+            image={photo}
+            cropAspectRatio={config.cropAspectRatio === 'free' ? undefined : config.cropAspectRatio}
+            cropShape={config.cropShape}
+            onCropComplete={handleCropComplete}
+            onCropCancel={handleCropCancel}
+            style={{ position: 'absolute', inset: 0, zIndex: 20 }}
+          />
+        ) : showPhoto && photo ? (
           <div className="photo-preview">
             <img src={photo} alt="Captured" className="photo-img" />
             <div className="photo-actions">
@@ -314,6 +354,60 @@ const App: React.FC = () => {
               Tip: Enable for selfies so text and faces are not flipped.
             </p>
           </SettingGroup>
+
+          <hr className="setting-divider" />
+
+          {/* Crop Settings */}
+          <SettingGroup label="Crop After Capture">
+            <label className="switch-label">
+              <input
+                type="checkbox"
+                checked={config.cropEnabled}
+                onChange={(e) => updateConfig({ cropEnabled: e.target.checked })}
+                className="setting-checkbox"
+              />
+              <span>{config.cropEnabled ? 'Enabled' : 'Disabled'}</span>
+            </label>
+            <p className="hint">
+              When enabled, a WhatsApp-style crop screen appears after taking a photo.
+            </p>
+          </SettingGroup>
+
+          {config.cropEnabled && (
+            <>
+              <SettingGroup label="Crop Aspect Ratio">
+                <select
+                  className="setting-select"
+                  value={config.cropAspectRatio === 'free' ? 'free' : config.cropAspectRatio.toString()}
+                  onChange={(e) =>
+                    updateConfig({
+                      cropAspectRatio: e.target.value === 'free' ? 'free' : parseFloat(e.target.value),
+                    })
+                  }
+                >
+                  {CROP_ASPECT_RATIOS.map((ar) => (
+                    <option key={ar.label} value={typeof ar.value === 'number' ? ar.value.toString() : 'free'}>
+                      {ar.label}
+                    </option>
+                  ))}
+                </select>
+              </SettingGroup>
+
+              <SettingGroup label="Crop Shape">
+                <div className="btn-group">
+                  {(['rect', 'circle'] as const).map((shape) => (
+                    <button
+                      key={shape}
+                      className={`toggle-btn${config.cropShape === shape ? ' active' : ''}`}
+                      onClick={() => updateConfig({ cropShape: shape })}
+                    >
+                      {shape === 'rect' ? 'Rectangle' : 'Circle'}
+                    </button>
+                  ))}
+                </div>
+              </SettingGroup>
+            </>
+          )}
 
           <hr className="setting-divider" />
 

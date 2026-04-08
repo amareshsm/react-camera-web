@@ -17,6 +17,11 @@ import {
   CameraProps,
   TakePhotoOptions, // new in v1.1.0
   CameraType,       // deprecated alias — use CameraRef
+  CropView,         // new in v1.2.0
+  CropViewRef,      // new in v1.2.0
+  CropViewProps,    // new in v1.2.0
+  CropArea,         // new in v1.2.0
+  CropResult,       // new in v1.2.0
 } from 'react-webcam-pro';
 ```
 
@@ -180,3 +185,64 @@ type SetPermissionDenied = React.Dispatch<React.SetStateAction<boolean>>;
 ```
 
 These are standard React state setter types used within the Camera component's implementation.
+
+---
+
+## CropView Types *(new in v1.2.0)*
+
+### `CropViewRef`
+
+The interface for the CropView ref object:
+
+```ts
+interface CropViewRef {
+  cropImage: () => CropResult;
+  resetCrop: () => void;
+  getCropArea: () => CropArea;
+}
+```
+
+### `CropViewProps`
+
+The props interface for the `CropView` component:
+
+```ts
+interface CropViewProps {
+  image: string;
+  cropAspectRatio?: number;
+  cropShape?: 'rect' | 'circle';
+  minCropSize?: number;
+  onCropComplete: (result: CropResult) => void;
+  onCropCancel?: () => void;
+  labels?: { confirm?: string; cancel?: string; reset?: string };
+  className?: string;
+  style?: React.CSSProperties;
+}
+```
+
+See the [Cropping Guide](/docs/guides/cropping) for detailed documentation of each property.
+
+### `CropArea`
+
+Represents the crop region as fractions (0–1) relative to the image:
+
+```ts
+interface CropArea {
+  x: number;      // Left offset (0–1)
+  y: number;      // Top offset (0–1)
+  width: number;  // Width (0–1)
+  height: number; // Height (0–1)
+}
+```
+
+### `CropResult`
+
+The result returned when a crop is confirmed:
+
+```ts
+interface CropResult {
+  base64: string;      // Cropped image as JPEG data URL
+  imgData: ImageData;  // Cropped image as raw ImageData
+  cropArea: CropArea;  // The crop area used
+}
+```

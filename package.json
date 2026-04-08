@@ -1,7 +1,7 @@
 {
   "name": "react-webcam-pro",
   "description": "Universal camera component for React — supports React 16-19, videoConstraints, mirror photo capture, TypeScript, and iOS/Android/webcam. Community-maintained fork of react-camera-pro.",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "keywords": [

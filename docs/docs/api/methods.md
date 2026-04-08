@@ -253,3 +253,118 @@ interface CameraRef {
   torchSupported: boolean;
 }
 ```
+
+---
+
+# CropView Methods (via Ref)
+
+The `CropView` component is also controlled through a React ref. This gives you imperative access to crop actions like extracting the cropped image, resetting the crop area, and reading the current crop coordinates.
+
+:::info New in v1.2.0
+The `CropView` component was introduced in v1.2.0. See the [v1.2.0 release notes](/docs/releases/v1.2.0) and the [Cropping Guide](/docs/guides/cropping).
+:::
+
+## Setup
+
+```tsx
+import { useRef } from 'react';
+import { CropView, CropViewRef } from 'react-webcam-pro';
+
+const App = () => {
+  const cropRef = useRef<CropViewRef>(null);
+
+  return <CropView ref={cropRef} image={photoBase64} />;
+};
+```
+
+You can then call methods on `cropRef.current`:
+
+```tsx
+const result = await cropRef.current?.cropImage();
+```
+
+---
+
+## `cropImage()`
+
+| Returns | Async |
+|---------|-------|
+| `Promise<CropResult>` | Yes |
+
+Extracts the cropped region from the source image using the Canvas API. Returns a `CropResult` object containing the cropped image in multiple formats.
+
+```tsx
+const handleConfirm = async () => {
+  const result = await cropRef.current?.cropImage();
+  if (result) {
+    console.log(result.base64);    // data:image/png;base64,…
+    console.log(result.imageData); // ImageData object
+    console.log(result.cropArea);  // { x, y, width, height }
+  }
+};
+```
+
+**`CropResult` shape:**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `base64` | `string` | Base64-encoded PNG data URL |
+| `imageData` | `ImageData` | Raw pixel data (for canvas/WebGL use) |
+| `cropArea` | `CropArea` | The fractional crop coordinates used |
+
+---
+
+## `resetCrop()`
+
+| Returns |
+|---------|
+| `void` |
+
+Resets the crop area back to its initial position (centered, respecting `cropAspectRatio` if set).
+
+```tsx
+<button onClick={() => cropRef.current?.resetCrop()}>
+  Reset
+</button>
+```
+
+---
+
+## `getCropArea()`
+
+| Returns |
+|---------|
+| `CropArea` |
+
+Returns a **copy** of the current crop area. Values are fractional (0–1) relative to the image dimensions.
+
+```tsx
+const area = cropRef.current?.getCropArea();
+// { x: 0.1, y: 0.15, width: 0.8, height: 0.7 }
+```
+
+:::tip
+`getCropArea()` returns a copy, not a reference. Mutating the returned object does **not** affect the crop box.
+:::
+
+---
+
+## CropView Methods Summary
+
+| Member | Kind | Returns | Description |
+|--------|------|---------|-------------|
+| `cropImage()` | Method | `Promise<CropResult>` | Extracts the cropped image |
+| `resetCrop()` | Method | `void` | Resets crop to initial state |
+| `getCropArea()` | Method | `CropArea` | Returns current crop coordinates |
+
+## CropViewRef Interface
+
+The complete TypeScript interface for the crop view ref:
+
+```ts
+interface CropViewRef {
+  cropImage(): Promise<CropResult>;
+  resetCrop(): void;
+  getCropArea(): CropArea;
+}
+```

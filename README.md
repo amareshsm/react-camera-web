@@ -37,6 +37,17 @@ A huge **thank you** to the original creators and contributors of `react-camera-
 
 ## ✨ What's New
 
+### v1.2.0 — April 8, 2026
+
+- ✅ **`<CropView />` component** — WhatsApp-style interactive crop after photo capture
+- ✅ **Drag, resize, pinch** — Cross-platform crop interactions (desktop + mobile)
+- ✅ **Aspect ratio lock** — Lock crop to 1:1, 16:9, 4:3, or free-form
+- ✅ **Circle crop shape** — Visual circular crop mask (output still rectangular)
+- ✅ **Ref-controlled** — `cropImage()`, `resetCrop()`, `getCropArea()` via ref
+- ✅ **Zero new dependencies** — Uses native Canvas & Pointer Events APIs
+
+👉 **[Full v1.2.0 release notes](https://amareshsm.github.io/react-webcam-pro/docs/releases/v1.2.0)**
+
 ### v1.1.0 — April 7, 2026
 
 - ✅ **`videoConstraints` prop** — Control resolution, frame rate, and any `MediaTrackConstraints` ([#52](https://github.com/purple-technology/react-camera-pro/issues/52))
@@ -68,6 +79,7 @@ A huge **thank you** to the original creators and contributors of `react-camera-
   - Cover your container or define aspect ratio (16/9, 4/3, 1/1, ...)
 - 📸 Take photos as base64 JPEG or ImageData — with the same aspect ratio as the view
 - 🪞 Mirror captured photos with `takePhoto({ mirror: true })`
+- ✂️ **WhatsApp-style crop** with `<CropView />` — drag, resize, aspect ratio lock *(new in v1.2.0)*
 - 🎛️ Custom video constraints via `videoConstraints` prop (resolution, fps, etc.)
 - 🖥️ Works with standard webcams and other video input devices
 - 🔄 Switch between user/environment cameras
@@ -157,6 +169,68 @@ All fields are optional. Defaults:
 | `getNumberOfCameras()`              | `number`                  | Returns the number of available cameras                                  |
 | `toggleTorch()`                     | `boolean`                 | Toggles the torch/flashlight                                             |
 | `torchSupported`                    | `boolean`                 | Whether the torch is supported                                           |
+
+---
+
+## CropView Component *(new in v1.2.0)*
+
+A separate `<CropView />` component for WhatsApp-style interactive cropping. Use it after capturing a photo — it's fully independent from `<Camera />`.
+
+### Quick Example
+
+```tsx
+import { Camera, CameraRef, CropView, CropResult } from "react-webcam-pro";
+
+const App = () => {
+  const camera = useRef<CameraRef>(null);
+  const [photo, setPhoto] = useState<string | null>(null);
+  const [cropped, setCropped] = useState<string | null>(null);
+
+  if (cropped) return <img src={cropped} alt="Cropped" />;
+
+  if (photo) {
+    return (
+      <CropView
+        image={photo}
+        cropAspectRatio={1}  // square lock (optional)
+        onCropComplete={(result) => setCropped(result.base64)}
+        onCropCancel={() => setPhoto(null)}
+      />
+    );
+  }
+
+  return (
+    <div>
+      <Camera ref={camera} />
+      <button onClick={() => setPhoto(camera.current?.takePhoto() as string)}>
+        📸 Capture
+      </button>
+    </div>
+  );
+};
+```
+
+### CropView Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `image` | `string` | **(required)** | Base64 data URL of the image to crop |
+| `cropAspectRatio` | `number` | `undefined` | Lock crop to an aspect ratio (e.g. `1`, `16/9`). Free-form if omitted. |
+| `cropShape` | `'rect' \| 'circle'` | `'rect'` | Visual crop shape (output is always rectangular) |
+| `minCropSize` | `number` | `0.1` | Minimum crop size as fraction of image (0–1) |
+| `onCropComplete` | `(result: CropResult) => void` | **(required)** | Called with the cropped image when confirmed |
+| `onCropCancel` | `() => void` | `undefined` | Called when the user cancels |
+| `labels` | `{ confirm?, cancel?, reset? }` | `Crop/Cancel/Reset` | Custom button labels |
+| `className` | `string` | `undefined` | CSS class for the container |
+| `style` | `CSSProperties` | `undefined` | Inline styles for the container |
+
+### CropView Methods (via Ref)
+
+| Method | Return Type | Description |
+| ------ | ----------- | ----------- |
+| `cropImage()` | `CropResult` | Programmatically trigger crop |
+| `resetCrop()` | `void` | Reset crop area to default |
+| `getCropArea()` | `CropArea` | Get current crop area (fractions 0–1) |
 
 ---
 

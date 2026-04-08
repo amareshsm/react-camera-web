@@ -12,6 +12,26 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.2.0](https://github.com/amareshsm/react-webcam-pro/releases/tag/v1.2.0) — TBD
+
+**WhatsApp-style image cropping with CropView component.**
+
+👉 [Full release notes →](/docs/releases/v1.2.0)
+
+### ✨ Features
+
+- **`CropView` component** — Standalone image cropper with drag, resize, aspect ratio lock, circle crop, and built-in toolbar.
+- **Imperative API** — `cropImage()`, `resetCrop()`, `getCropArea()` methods via ref.
+- **Cross-platform interactions** — Built on Pointer Events API (mouse, touch, pen).
+- **Canvas-based extraction** — Pixel-perfect crop output in base64 and ImageData formats.
+- **New type exports** — `CropViewProps`, `CropViewRef`, `CropArea`, `CropResult`.
+
+### 🧪 Tests
+
+- Added 67 new tests (136+ total) covering all crop utilities, component rendering, callbacks, ref methods, and backward compatibility.
+
+---
+
 ## [1.1.0](https://github.com/amareshsm/react-webcam-pro/releases/tag/v1.1.0) — 2026-04-07
 
 **Resolution control, mirrored photos, and Firefox/iOS 15 fix.**

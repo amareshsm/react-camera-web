@@ -322,3 +322,224 @@ This prop was not available in previous versions. See the [v1.1.0 release notes]
 | `className` | `string` | `undefined` | CSS class name |
 | `style` | `CSSProperties` | `undefined` | Inline styles |
 | `videoConstraints` | `MediaTrackConstraints` | `undefined` | Custom video constraints |
+
+---
+
+# CropView Props
+
+The `CropView` component accepts the following props. Only `image` is required — everything else has sensible defaults.
+
+:::info New in v1.2.0
+The `CropView` component was introduced in v1.2.0. See the [v1.2.0 release notes](/docs/releases/v1.2.0) and the [Cropping Guide](/docs/guides/cropping).
+:::
+
+```tsx
+import { CropView } from 'react-webcam-pro';
+
+// Minimal — just an image
+<CropView ref={cropRef} image={photoBase64} />
+
+// Fully configured
+<CropView
+  ref={cropRef}
+  image={photoBase64}
+  cropAspectRatio={1}
+  cropShape="circle"
+  minCropSize={0.15}
+  onCropComplete={handleCropComplete}
+  onCropCancel={handleCropCancel}
+  labels={{ confirm: 'Save', cancel: 'Back', reset: 'Undo' }}
+  className="my-crop"
+  style={{ borderRadius: 8 }}
+/>
+```
+
+---
+
+## `image`
+
+| Type | Default | Required |
+|------|---------|----------|
+| `string` | — | **Yes** |
+
+The source image to crop. Typically a base64 data URL returned by `Camera.takePhoto()`.
+
+```tsx
+<CropView image={photoBase64} />
+```
+
+---
+
+## `cropAspectRatio`
+
+| Type | Default | Required |
+|------|---------|----------|
+| `number \| undefined` | `undefined` (free-form) | No |
+
+Locks the crop box to a fixed aspect ratio (width / height). When `undefined`, the user can resize the crop box freely.
+
+```tsx
+// Square crop (1:1)
+<CropView image={photo} cropAspectRatio={1} />
+
+// Landscape crop (16:9)
+<CropView image={photo} cropAspectRatio={16 / 9} />
+
+// Portrait crop (9:16)
+<CropView image={photo} cropAspectRatio={9 / 16} />
+
+// Free-form (default)
+<CropView image={photo} />
+```
+
+---
+
+## `cropShape`
+
+| Type | Default | Required |
+|------|---------|----------|
+| `'rect' \| 'circle'` | `'rect'` | No |
+
+Controls the visual shape of the crop area.
+
+- **`'rect'`** — Standard rectangular crop box.
+- **`'circle'`** — Circular crop overlay (useful for profile pictures). The underlying crop is still a square bounding box.
+
+```tsx
+// Circle crop for avatars
+<CropView image={photo} cropShape="circle" cropAspectRatio={1} />
+```
+
+:::tip
+When using `cropShape="circle"`, set `cropAspectRatio={1}` for best results. A non-square circle crop will appear as an ellipse.
+:::
+
+---
+
+## `minCropSize`
+
+| Type | Default | Required |
+|------|---------|----------|
+| `number` | `0.1` | No |
+
+Minimum allowed size for the crop box, as a fraction of the image (0–1). Prevents users from making the crop area too small.
+
+```tsx
+// Allow smaller crops (5% minimum)
+<CropView image={photo} minCropSize={0.05} />
+
+// Enforce larger minimum (25%)
+<CropView image={photo} minCropSize={0.25} />
+```
+
+---
+
+## `onCropComplete`
+
+| Type | Default | Required |
+|------|---------|----------|
+| `(result: CropResult) => void` | `undefined` | No |
+
+Called when the user taps the **Confirm** button on the built-in toolbar. Receives a `CropResult` with the cropped image data.
+
+```tsx
+<CropView
+  image={photo}
+  onCropComplete={(result) => {
+    setFinalPhoto(result.base64);
+  }}
+/>
+```
+
+---
+
+## `onCropCancel`
+
+| Type | Default | Required |
+|------|---------|----------|
+| `() => void` | `undefined` | No |
+
+Called when the user taps the **Cancel** button on the built-in toolbar.
+
+```tsx
+<CropView
+  image={photo}
+  onCropCancel={() => {
+    setShowCrop(false);
+  }}
+/>
+```
+
+---
+
+## `labels`
+
+| Type | Default | Required |
+|------|---------|----------|
+| `{ confirm?: string; cancel?: string; reset?: string }` | `{ confirm: '✓', cancel: '✕', reset: '↺' }` | No |
+
+Customize the text displayed on the toolbar buttons. Useful for localization.
+
+```tsx
+// English labels
+<CropView
+  image={photo}
+  labels={{ confirm: 'Save', cancel: 'Back', reset: 'Reset' }}
+/>
+
+// Spanish labels
+<CropView
+  image={photo}
+  labels={{ confirm: 'Guardar', cancel: 'Cancelar', reset: 'Restablecer' }}
+/>
+
+// Partial override (only change confirm)
+<CropView
+  image={photo}
+  labels={{ confirm: 'Done' }}
+/>
+```
+
+---
+
+## `className`
+
+| Type | Default | Required |
+|------|---------|----------|
+| `string` | `undefined` | No |
+
+CSS class name applied to the outermost wrapper element.
+
+```tsx
+<CropView image={photo} className="crop-wrapper" />
+```
+
+---
+
+## `style`
+
+| Type | Default | Required |
+|------|---------|----------|
+| `CSSProperties` | `undefined` | No |
+
+Inline styles applied to the outermost wrapper element.
+
+```tsx
+<CropView image={photo} style={{ maxHeight: '80vh' }} />
+```
+
+---
+
+## CropView Props Summary Table
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `image` | `string` | — | Source image (base64 data URL) |
+| `cropAspectRatio` | `number` | `undefined` | Lock crop to aspect ratio |
+| `cropShape` | `'rect' \| 'circle'` | `'rect'` | Visual shape of crop area |
+| `minCropSize` | `number` | `0.1` | Minimum crop size (0–1) |
+| `onCropComplete` | `(result: CropResult) => void` | `undefined` | Confirm button callback |
+| `onCropCancel` | `() => void` | `undefined` | Cancel button callback |
+| `labels` | `{ confirm?, cancel?, reset? }` | `{ '✓', '✕', '↺' }` | Toolbar button labels |
+| `className` | `string` | `undefined` | CSS class name |
+| `style` | `CSSProperties` | `undefined` | Inline styles |

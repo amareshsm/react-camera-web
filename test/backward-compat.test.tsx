@@ -9,7 +9,7 @@
 import React from 'react';
 import { render, act, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { Camera, CameraType, CameraProps } from '../src/index';
+import { Camera, CameraType, CameraProps, CropView, CropViewProps, CropViewRef, CropArea, CropResult } from '../src/index';
 import { CameraRef } from '../src/components/Camera/types';
 import { mockGetUserMedia } from './setup';
 
@@ -312,5 +312,75 @@ describe('Backward Compatibility with react-camera-pro', () => {
       });
       expect(typeof ref.current?.torchSupported).toBe('boolean');
     });
+  });
+});
+
+describe('CropView — coexistence with Camera (no breaking changes)', () => {
+  it('should export CropView from the package', () => {
+    expect(CropView).toBeDefined();
+    expect(typeof CropView).toBe('object'); // forwardRef returns an object
+  });
+
+  it('CropView export should have displayName', () => {
+    expect(CropView.displayName).toBe('CropView');
+  });
+
+  it('should export CropViewProps type (compile test)', () => {
+    // Type-level test — if this file compiles, CropViewProps is exported correctly
+    const _props: CropViewProps = {
+      image: 'data:image/jpeg;base64,test',
+      onCropComplete: () => {},
+    };
+    expect(_props.image).toBe('data:image/jpeg;base64,test');
+  });
+
+  it('should export CropViewRef type (compile test)', () => {
+    // Type-level test
+    const _ref: CropViewRef | null = null;
+    expect(_ref).toBeNull();
+  });
+
+  it('should export CropArea type (compile test)', () => {
+    const _area: CropArea = { x: 0, y: 0, width: 1, height: 1 };
+    expect(_area.x).toBe(0);
+  });
+
+  it('should export CropResult type (compile test)', () => {
+    const _result: CropResult | null = null;
+    expect(_result).toBeNull();
+  });
+
+  it('Camera component is NOT affected by CropView addition', async () => {
+    // The exact same pattern from react-camera-pro should still work
+    const ref = React.createRef<CameraType>();
+    await act(async () => {
+      render(<Camera ref={ref} />);
+    });
+    expect(document.querySelector('video')).toBeInTheDocument();
+    expect(typeof ref.current?.takePhoto).toBe('function');
+    expect(typeof ref.current?.switchCamera).toBe('function');
+    expect(typeof ref.current?.getNumberOfCameras).toBe('function');
+    expect(typeof ref.current?.toggleTorch).toBe('function');
+    expect(typeof ref.current?.torchSupported).toBe('boolean');
+  });
+
+  it('CropView renders alongside Camera without interference', async () => {
+    const TEST_IMAGE = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAP/bAEMAFA==';
+    const cameraRef = React.createRef<CameraType>();
+
+    await act(async () => {
+      render(
+        <div>
+          <Camera ref={cameraRef} />
+          <CropView image={TEST_IMAGE} onCropComplete={() => {}} />
+        </div>,
+      );
+    });
+
+    // Both components should render
+    expect(document.querySelector('video')).toBeInTheDocument();
+    expect(document.querySelector('img')).toBeInTheDocument();
+    // Camera ref methods still work
+    expect(typeof cameraRef.current?.takePhoto).toBe('function');
   });
 });

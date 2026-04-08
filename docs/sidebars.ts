@@ -29,6 +29,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'guides/switching-cameras',
         'guides/aspect-ratio',
+        'guides/cropping',
         'guides/error-handling',
         'guides/torch',
         'guides/device-selection',
@@ -48,6 +49,7 @@ const sidebars: SidebarsConfig = {
       collapsed: false,
       items: [
         'releases/changelog',
+        'releases/v1.2.0',
         'releases/v1.1.0',
         'releases/v1.0.0',
       ],
